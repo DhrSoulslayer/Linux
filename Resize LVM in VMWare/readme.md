@@ -1,4 +1,4 @@
-#Increase default LVM on Ubuntu 18 & 20
+# Increase default LVM on Ubuntu 18 & 20
 
 This script assumes the following disk layout:
 
