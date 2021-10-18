@@ -1,12 +1,15 @@
 #!/bin/bash
+#Set current time and date
+filedate=$(date +%Y-%m-%d"-"%H:%M)
 
 #DGet the new mirror url from the commandline input
 aptmirror=$1
+
 #Get the ubuntu codename for the running distribution
 distro=$(cat /etc/os-release | grep UBUNTU_CODENAME | awk -F= '{ print $2 }')
 
 #Backup current sources.list file
-mv /etc/apt/sources.list /etc/apt/sources.list.backup
+mv /etc/apt/sources.list /etc/apt/sources.list.backup.$filedate
 
 #Create new sources file and populate it with the new repo
 touch /etc/apt/sources.list
