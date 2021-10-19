@@ -1,7 +1,8 @@
 #!/bin/bash
 volume_name=nfs
 number_of_servers=2
-datadir=/glusterfs
+datadir=/glusterfs_brick
+clientdir=/glusterfs_node
 host1=10.60.60.61
 host2=10.60.60.62
 local_host=hostname
@@ -11,7 +12,7 @@ mkdir $datadir
 apt update
 add-apt-repository ppa:gluster/glusterfs-7
 apt update
-apt install -y glusterfs-server keepalived
+apt install -y glusterfs-server keepalived glusterfs-client
 
 #Starting GlusterFS Services:
 systemctl start glusterd.service
@@ -65,3 +66,6 @@ EOT
 
 systemctl restart nfs-ganesha
 systemctl enable nfs-ganesha
+
+#Mount gluster node on server
+mount -t glusterfs $host1:$datadir $glusterfs_node
