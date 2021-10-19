@@ -2,8 +2,8 @@
 volume_name=nfs
 number_of_servers=2
 datadir=/glusterfs
-host1=hostname1
-host2=hostname2
+host1=10.60.60.61
+host2=10.60.60.62
 local_host=hostname
 
 #Install en setup GlusterFS 2 Node Mirror Cluster
@@ -12,6 +12,12 @@ apt update
 add-apt-repository ppa:gluster/glusterfs-7
 apt update
 apt install -y glusterfs-server keepalived
+
+#Starting GlusterFS Services:
+systemctl start glusterd.service
+systemctl enable glusterd.service
+
+#Create and start gluster volume
 gluster volume create $volume_name replica $number_of_servers $host1:$datadir $host2:$datadir force
 gluster volume start $volume_name
 
