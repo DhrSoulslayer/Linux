@@ -2,10 +2,14 @@
 volume_name=nfs
 number_of_servers=2
 datadir=/glusterfs_brick
-clientdir=/glusterfs_node
-host1=$(ip address | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+clientdir=/glusterfsnode
+host1=10.60.60.61
 host2=10.60.60.62
-local_ip=$(ip address | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+local_host=hostname
+probe_neighbour=$(ip a | grep 10.60.60 | awk '{print $2}' | awk -F "/" '{print $1}')
+
+#Mount databrick on seperate harddrive
+mount /dev/sdb1 $datadir
 
 #Install en setup GlusterFS 2 Node Mirror Cluster
 add-apt-repository ppa:gluster/glusterfs-7 -y
@@ -15,7 +19,7 @@ apt install -y glusterfs-server keepalived glusterfs-client
 #Starting GlusterFS Services:
 systemctl start glusterd.service
 systemctl enable glusterd.service
-gluster peer probe $host2
+gluster peer probe $probe_neighbour
 
 #Create and start gluster volume
 gluster volume create $volume_name replica $number_of_servers $host1:$datadir $host2:$datadir force
@@ -68,3 +72,15 @@ systemctl enable nfs-ganesha
 #Mount gluster node on server
 mkdir $clientdir
 mount -t glusterfs $host1:$volume_name $clientdir
+
+#Setup so that fstab will mount the glsuteclient after gluster service has started
+mkdir /etc/systemd/system/glusternode.mount.d/
+touch override.conf
+cat <<EOT >> /etc/systemd/system/glusternode.mount.d/override.conf
+[Unit]
+After=glusterfs-server.service
+Wants=glusterfs-server.service
+EOT
+
+#Setup glusternode in fstab
+echo localhost:/$volume_name $clientdir glusterfs defaults,_netdev 0 0 > /etc/fstab
