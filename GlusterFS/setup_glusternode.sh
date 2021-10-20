@@ -8,7 +8,6 @@ host2=10.60.60.62
 local_ip=$(ip address | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 
 #Install en setup GlusterFS 2 Node Mirror Cluster
-apt update
 add-apt-repository ppa:gluster/glusterfs-7 -y
 apt update
 apt install -y glusterfs-server keepalived glusterfs-client
