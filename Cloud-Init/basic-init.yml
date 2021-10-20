@@ -1,0 +1,24 @@
+growpart:
+  mode: auto
+  devices: ['/']
+  ignore_growroot_disabled: false
+users:
+  - name: user
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+apt:
+  primary:
+    - arches: [default]
+      uri: http://nl.archive.ubuntu.com/ubuntu/
+package_update: true
+packages:
+  - htop
+  - tmux
+  - sl	 
+  - nload
+  - glances 
+#Change user password insecure
+chpasswd:
+  list: |
+    user:user123!
+  expire: False

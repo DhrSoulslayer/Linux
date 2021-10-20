@@ -3,27 +3,26 @@ volume_name=nfs
 number_of_servers=2
 datadir=/glusterfs_brick
 clientdir=/glusterfs_node
-host1=10.60.60.61
+host1=$(ip address | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 host2=10.60.60.62
-local_host=hostname
+local_ip=$(ip address | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 
 #Install en setup GlusterFS 2 Node Mirror Cluster
-mkdir $datadir
 apt update
-add-apt-repository ppa:gluster/glusterfs-7
+add-apt-repository ppa:gluster/glusterfs-7 -y
 apt update
 apt install -y glusterfs-server keepalived glusterfs-client
 
 #Starting GlusterFS Services:
 systemctl start glusterd.service
 systemctl enable glusterd.service
+gluster peer probe $host2
 
 #Create and start gluster volume
 gluster volume create $volume_name replica $number_of_servers $host1:$datadir $host2:$datadir force
 gluster volume start $volume_name
 
-#Setup NFS share for keepalive
-gluster volume set $volume_name nfs.disable
+#Setup Ganesha NFS share
 apt -y install nfs-ganesha-gluster
 mv /etc/ganesha/ganesha.conf /etc/ganesha/ganesha.conf.org
 cat <<EOT >> /etc/ganesha/ganesha.conf
@@ -68,4 +67,5 @@ systemctl restart nfs-ganesha
 systemctl enable nfs-ganesha
 
 #Mount gluster node on server
-mount -t glusterfs $host1:$datadir $glusterfs_node
+mkdir $clientdir
+mount -t glusterfs $host1:$volume_name $clientdir
